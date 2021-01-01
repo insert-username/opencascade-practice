@@ -1,0 +1,23 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+
+PROJECT(occpractice)
+
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+#Find opencascade libraries
+FIND_PACKAGE(OpenCasCade REQUIRED)
+message("OCE_FOUND? <${OCE_FOUND}>")
+message("OCC_FOUND? <${OCC_FOUND}>")
+message("OCC INCLUDE DIR: <${OCC_INCLUDE_DIR}>")
+message("OCC Libraries: <${OCC_LIBRARIES}>")
+
+INCLUDE_DIRECTORIES(${OCC_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(main src/main.cpp)
+
+target_link_libraries(main TKernel TKMath TKPrim TKBO TKFillet TKMesh TKG2d TKG3d TKIGES TKSTL
+TKShHealing TKXSBase TKBool TKBRep TKTopAlgo TKGeomAlgo TKGeomBase TKOffset TKSTEPAttr TKSTEP209
+TKSTEP TKHLR TKFeat)
+
