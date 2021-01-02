@@ -4,12 +4,13 @@
 #include <limits>
 
 #include <gp_Pnt.hxx>
+#include <STEPControl_Writer.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Trsf.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS.hxx>
-
+#include <RWStl.hxx>
 #include <BRepLib.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GC_MakeSegment.hxx>
@@ -261,7 +262,15 @@ int main() {
     builder.Add(compound, body);
     builder.Add(compound, thread);
 
-    log("Done!");
+    log("Writing step file...");
+
+    STEPControl_Writer stepWriter;
+    IFSelect_ReturnStatus retStat = stepWriter.Transfer(compound, STEPControl_AsIs);
+    stepWriter.Write("/home/luke/output.step");
+
+    
+    log("Starting viewer...");
+    
 }
 
 

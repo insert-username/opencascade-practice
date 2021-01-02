@@ -11,4 +11,5 @@ pushd bld;
 
 cmake ..;
 make;
+echo "Build complete!"
 ./bin/*

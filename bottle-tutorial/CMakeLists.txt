@@ -17,7 +17,5 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(main src/main.cpp)
 
-target_link_libraries(main TKernel TKMath TKPrim TKBO TKFillet TKMesh TKG2d TKG3d TKIGES TKSTL
-TKShHealing TKXSBase TKBool TKBRep TKTopAlgo TKGeomAlgo TKGeomBase TKOffset TKSTEPAttr TKSTEP209
-TKSTEP TKHLR TKFeat)
+target_link_libraries(main TKFillet TKMesh TKernel TKG2d TKG3d TKMath TKIGES TKSTL TKShHealing TKXSBase TKBool TKBO TKBRep TKTopAlgo TKGeomAlgo TKGeomBase TKOffset TKPrim TKSTEPBase TKSTEPAttr TKSTEP209 TKSTEP TKHLR TKFeat)
 
