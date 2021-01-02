@@ -4,10 +4,12 @@
 
 #include <Xw_Window.hxx>
 #include <V3d_View.hxx>
+#include <AIS_Shape.hxx>
 
 #include <Aspect_Handle.hxx>
 #include <AIS_InteractiveContext.hxx>
-
+#include "MakeBottle.h"
+#include <BRepPrimAPI_MakeBox.hxx>
 
 static Handle(Graphic3d_GraphicDriver) GetGraphicDriver(Handle(Aspect_DisplayConnection) &displayConnection) {
     static Handle(Graphic3d_GraphicDriver) driver;
@@ -23,11 +25,11 @@ OccView::OccView(QWidget *parent) : QWidget(parent)
     Handle(Aspect_DisplayConnection) displayConnection =
             new Aspect_DisplayConnection();
 
-    Handle(Graphic3d_GraphicDriver) graphicDriver =
-            GetGraphicDriver(displayConnection);
-
     Handle(Xw_Window) window =
             new Xw_Window(displayConnection, (Window)winId());
+
+    Handle(Graphic3d_GraphicDriver) graphicDriver =
+            GetGraphicDriver(displayConnection);
 
     viewer = new V3d_Viewer(graphicDriver);
 
@@ -38,9 +40,6 @@ OccView::OccView(QWidget *parent) : QWidget(parent)
         window->Map();
     }
 
-    Handle(AIS_InteractiveContext) interactiveContext =
-            new AIS_InteractiveContext(viewer);
-
     viewer->SetDefaultLights();
     viewer->SetLightOn();
 
@@ -48,23 +47,18 @@ OccView::OccView(QWidget *parent) : QWidget(parent)
     view->MustBeResized();
     view->TriedronDisplay(
                 Aspect_TOTP_LEFT_LOWER,
-                Quantity_NOC_GOLD,
+                Quantity_NOC_WHITE,
                 0.08,
                 V3d_ZBUFFER);
+    view->ZBufferTriedronSetup();
 
-    interactiveContext->SetDisplayMode(AIS_Shaded, Standard_True);
-}
 
-QPaintEngine* OccView::paintEngine() const {
-    return 0;
-}
 
-void OccView::paintEvent(QPaintEvent *event) {
+
+    context = new AIS_InteractiveContext(viewer);
+    context->SetDisplayMode(AIS_Shaded, Standard_True);
+
+    view->FitAll();
+    view->ZFitAll();
     view->Redraw();
-}
-
-void OccView::resizeEvent(QResizeEvent *event) {
-    if (!view.IsNull()) {
-        view->MustBeResized();
-    }
 }

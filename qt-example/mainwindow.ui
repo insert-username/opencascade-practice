@@ -25,12 +25,18 @@
    </property>
    <widget class="QMenu" name="menuTest">
     <property name="title">
-     <string>Test</string>
+     <string>Actions</string>
     </property>
+    <addaction name="actionAddBox"/>
    </widget>
    <addaction name="menuTest"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAddBox">
+   <property name="text">
+    <string>Add Box</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "occview.h"
+#include <AIS_Shape.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,7 +18,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected slots:
+    void addBox();
+
 private:
     Ui::MainWindow *ui;
+    OccView* occView;
 };
 #endif // MAINWINDOW_H
