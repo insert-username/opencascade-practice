@@ -7,10 +7,15 @@
 #include <V3d_Viewer.hxx>
 #include <AIS_InteractiveContext.hxx>
 
+#include "mouse-input-monitor.h"
+#include "camera-controller.h"
+
 class OccView : public QWidget
 {
 private:
     bool isResizePending = true;
+    MouseInputMonitor mouseInputMonitor;
+    CameraController cameraController;
 
     Q_OBJECT
 public:
@@ -38,11 +43,26 @@ protected:
         isResizePending = true;
     }
 
-    virtual void mouseMoveEvent(QMouseEvent *event) {
-        view->Rotation(event->x(), event->y());
+protected:
+    void mouseMoveEvent(QMouseEvent *event) override {
+        mouseInputMonitor.accept(event);
+        cameraController.apply(mouseInputMonitor.poll(), view);
     }
 
+    void mousePressEvent(QMouseEvent *event) override {
+        mouseInputMonitor.accept(event);
+        cameraController.apply(mouseInputMonitor.poll(), view);
+    }
 
+    void mouseReleaseEvent(QMouseEvent *event) override {
+        mouseInputMonitor.accept(event);
+        cameraController.apply(mouseInputMonitor.poll(), view);
+    }
+
+    void mouseDoubleClickEvent(QMouseEvent *event) override {
+        mouseInputMonitor.accept(event);
+        cameraController.apply(mouseInputMonitor.poll(), view);
+    }
 
 };
 

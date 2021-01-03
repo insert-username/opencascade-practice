@@ -52,13 +52,12 @@ OccView::OccView(QWidget *parent) : QWidget(parent)
                 V3d_ZBUFFER);
     view->ZBufferTriedronSetup();
 
-
-
-
     context = new AIS_InteractiveContext(viewer);
     context->SetDisplayMode(AIS_Shaded, Standard_True);
 
     view->FitAll();
     view->ZFitAll();
     view->Redraw();
+
+    setMouseTracking(true);
 }
