@@ -1,6 +1,5 @@
 #include "occview.h"
 
-#include <OpenGl_GraphicDriver.hxx>
 
 #include <Xw_Window.hxx>
 #include <V3d_View.hxx>
@@ -20,7 +19,7 @@ static Handle(Graphic3d_GraphicDriver) GetGraphicDriver(Handle(Aspect_DisplayCon
     return driver;
 }
 
-OccView::OccView(QWidget *parent) : QWidget(parent)
+OccView::OccView(QWidget *parent) : QGLWidget(parent)
 {
     Handle(Aspect_DisplayConnection) displayConnection =
             new Aspect_DisplayConnection();

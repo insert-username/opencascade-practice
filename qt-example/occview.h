@@ -9,8 +9,10 @@
 
 #include "mouse-input-monitor.h"
 #include "camera-controller.h"
+#include <OpenGl_GraphicDriver.hxx>
+#include <QGLWidget>
 
-class OccView : public QWidget
+class OccView : public QGLWidget
 {
 private:
     bool isResizePending = true;
@@ -25,10 +27,6 @@ public:
     explicit OccView(QWidget *parent = nullptr);
 
 protected:
-
-    QPaintEngine* paintEngine() const {
-        return 0;
-    }
 
     void paintEvent(QPaintEvent *event) {
         if (isResizePending) {
