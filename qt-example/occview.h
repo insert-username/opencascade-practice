@@ -11,6 +11,14 @@
 #include "camera-controller.h"
 #include <OpenGl_GraphicDriver.hxx>
 #include <QGLWidget>
+#include <Aspect_Window.hxx>
+#include <Xw_Window.hxx>
+#include <V3d_View.hxx>
+#include <AIS_Shape.hxx>
+
+#include <Aspect_Handle.hxx>
+#include <AIS_InteractiveContext.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
 
 class OccView : public QGLWidget
 {
@@ -24,7 +32,46 @@ public:
     Handle(AIS_InteractiveContext) context;
     Handle(V3d_View) view;
     Handle(V3d_Viewer) viewer;
-    explicit OccView(QWidget *parent = nullptr);
+    explicit OccView(QWidget *parent) : QGLWidget(parent) {
+        Handle(Aspect_DisplayConnection) displayConnection =
+                new Aspect_DisplayConnection();
+
+        Handle(Aspect_Window) window =
+                new Xw_Window(displayConnection, (Window)winId());
+
+        Handle(Graphic3d_GraphicDriver) graphicDriver =
+                new OpenGl_GraphicDriver(displayConnection);
+
+        viewer = new V3d_Viewer(graphicDriver);
+
+        view = viewer->CreateView();
+
+        view->SetWindow(window);
+        if (!window->IsMapped()) {
+            window->Map();
+        }
+
+        viewer->SetDefaultLights();
+        viewer->SetLightOn();
+
+        view->SetBackgroundColor(Quantity_NOC_BLACK);
+        view->MustBeResized();
+        view->TriedronDisplay(
+                Aspect_TOTP_LEFT_LOWER,
+                Quantity_NOC_WHITE,
+                0.08,
+                V3d_ZBUFFER);
+        view->ZBufferTriedronSetup();
+
+        context = new AIS_InteractiveContext(viewer);
+        context->SetDisplayMode(AIS_Shaded, Standard_True);
+
+        view->FitAll();
+        view->ZFitAll();
+        view->Redraw();
+
+        setMouseTracking(true);
+    }
 
 protected:
 
