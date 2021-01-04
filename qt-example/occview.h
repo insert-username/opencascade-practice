@@ -9,6 +9,7 @@
 
 #include "mouse-input-monitor.h"
 #include "camera-controller.h"
+#include "select-controller.h"
 #include <OpenGl_GraphicDriver.hxx>
 #include <QGLWidget>
 #include <Aspect_Window.hxx>
@@ -25,7 +26,8 @@ class OccView : public QGLWidget
 private:
     bool isResizePending = true;
     MouseInputMonitor mouseInputMonitor;
-    CameraController cameraController;
+    CameraController cameraController{};
+    SelectController selectController{};
 
     Q_OBJECT
 public:
@@ -65,6 +67,8 @@ public:
 
         context = new AIS_InteractiveContext(viewer);
         context->SetDisplayMode(AIS_Shaded, Standard_True);
+        context->SetAutoActivateSelection(false);
+        context->MainSelector()->AllowOverlapDetection(true);
 
         view->FitAll();
         view->ZFitAll();
@@ -75,7 +79,7 @@ public:
 
 protected:
 
-    void paintEvent(QPaintEvent *event) {
+    void paintEvent(QPaintEvent *event) override {
         if (isResizePending) {
             view->MustBeResized();
             isResizePending = false;
@@ -84,31 +88,33 @@ protected:
         view->Redraw();
     }
 
-    void resizeEvent(QResizeEvent *event) {
+    void resizeEvent(QResizeEvent *event) override {
         isResizePending = true;
     }
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override {
-        mouseInputMonitor.accept(event);
-        cameraController.apply(mouseInputMonitor.poll(), view);
+        processMouseEvent(event);
     }
 
     void mousePressEvent(QMouseEvent *event) override {
-        mouseInputMonitor.accept(event);
-        cameraController.apply(mouseInputMonitor.poll(), view);
+        processMouseEvent(event);
     }
 
     void mouseReleaseEvent(QMouseEvent *event) override {
-        mouseInputMonitor.accept(event);
-        cameraController.apply(mouseInputMonitor.poll(), view);
+        processMouseEvent(event);
     }
 
     void mouseDoubleClickEvent(QMouseEvent *event) override {
-        mouseInputMonitor.accept(event);
-        cameraController.apply(mouseInputMonitor.poll(), view);
+        processMouseEvent(event);
     }
 
+private:
+    void processMouseEvent(QMouseEvent* event) {
+        mouseInputMonitor.accept(event);
+        cameraController.apply(mouseInputMonitor.poll(), view);
+        selectController.apply(mouseInputMonitor.poll(), view, context);
+    }
 };
 
 #endif // OCCVIEW_H

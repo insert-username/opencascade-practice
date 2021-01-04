@@ -27,6 +27,14 @@ struct MouseCommand {
 class MouseInputMonitor {
 private:
 
+    static bool isAnyButtonDown(QMouseEvent* mouseEvent) {
+        auto buttons = mouseEvent->buttons();
+
+        return (buttons & Qt::LeftButton) ||
+               (buttons & Qt::MiddleButton) ||
+               (buttons & Qt::RightButton);
+    }
+
     // tracks a single contiguous drag operation.
     class DragStateMonitor {
         int xDragStart{};
@@ -58,7 +66,7 @@ private:
             }
         }
 
-        bool applyDragParameters(MouseCommand &mouseCommand) const {
+        bool poll(MouseCommand &mouseCommand) const {
             // if not dragging, do nothing.
             if (isDragInProgress) {
                 mouseCommand.mouseCommandType = DRAG;
@@ -75,18 +83,58 @@ private:
 
             return true;
         }
+    };
 
+    //
+    class ClickStateMonitor {
     private:
-        static bool isAnyButtonDown(QMouseEvent* mouseEvent) {
-            auto buttons = mouseEvent->buttons();
+        // indicates if the mouse was down
+        // the last time the event was triggered.
+        bool wasLastEventMouseDown = false;
+        QPoint initialMouseDownPoint;
+        bool hasMouseDragged = true;
 
-            return (buttons & Qt::LeftButton) ||
-                    (buttons & Qt::MiddleButton) ||
-                    (buttons & Qt::RightButton);
+        bool hasClicked = false;
+        QPoint clickPoint;
+
+    public:
+        void accept(QMouseEvent* mouseEvent) {
+            if (isAnyButtonDown(mouseEvent)) {
+                if (wasLastEventMouseDown) {
+                    hasMouseDragged |= mouseEvent->pos() != initialMouseDownPoint;
+                } else {
+                    initialMouseDownPoint = mouseEvent->pos();
+                    hasMouseDragged = false;
+                }
+
+                wasLastEventMouseDown = true;
+            } else {
+
+                if (wasLastEventMouseDown && !hasMouseDragged) {
+                    hasClicked = true;
+                    clickPoint = mouseEvent->pos();
+                } else {
+                    hasClicked = false;
+                }
+
+                wasLastEventMouseDown = false;
+            }
+        }
+
+        bool poll(MouseCommand &mouseCommand) {
+            if (hasClicked) {
+                mouseCommand.x = clickPoint.x();
+                mouseCommand.y = clickPoint.y();
+                mouseCommand.mouseCommandType = CLICK;
+                return true;
+            } else {
+                return false;
+            }
         }
     };
 
     DragStateMonitor dragStateMonitor;
+    ClickStateMonitor clickStateMonitor;
 
     MouseCommand currentMouseCommand{};
 
@@ -96,8 +144,11 @@ public:
     // may be overwritten by this.
     void accept(QMouseEvent* mouseEvent) {
         dragStateMonitor.accept(mouseEvent);
+        clickStateMonitor.accept(mouseEvent);
 
-        dragStateMonitor.applyDragParameters(currentMouseCommand);
+        if (!clickStateMonitor.poll(currentMouseCommand)) {
+            dragStateMonitor.poll(currentMouseCommand);
+        }
     }
 
     // returns true if a mouse command is available to

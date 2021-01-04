@@ -13,8 +13,6 @@ class CameraController {
 
     constexpr static const double MOUSE_SENSITIVITY = 0.005;
 
-    Handle(V3d_View) view;
-
     Standard_Real startX;
     Standard_Real startY;
     Standard_Real startZ;

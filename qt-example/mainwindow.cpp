@@ -22,10 +22,13 @@ void MainWindow::addBox() {
     std::cout << "Adding box" << std::endl;
     TopoDS_Shape shape = BRepPrimAPI_MakeBox(3.0, 4.0, 5.0).Shape();
     Handle(AIS_Shape) aisShape = new AIS_Shape(shape);
-    aisShape->SetColor(Quantity_NOC_AZURE);
+    aisShape->SetColor(Quantity_NOC_BEET);
 
-    std::cout << "Adding box to context" << std::endl;
     this->occView->context->Display(aisShape, Standard_True);
+
+    this->occView->context->Load(aisShape, -1);
+    this->occView->context->Activate(aisShape, TopAbs_FACE);
+
     this->occView->view->FitAll();
     this->occView->view->ZFitAll();
     this->occView->view->Redraw();
