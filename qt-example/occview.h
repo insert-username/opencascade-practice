@@ -18,6 +18,7 @@
 #include <AIS_Shape.hxx>
 
 #include <Aspect_Handle.hxx>
+#include <Aspect_Grid.hxx>
 #include <AIS_InteractiveContext.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 
@@ -75,6 +76,7 @@ public:
         highlightStyle->SetColor(Quantity_NOC_RED1);
         highlightStyle->SetMethod(Aspect_TOHM_COLOR);
 
+        viewer->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
         view->FitAll();
         view->ZFitAll();
         view->Redraw();
