@@ -70,6 +70,11 @@ public:
         context->SetAutoActivateSelection(false);
         context->MainSelector()->AllowOverlapDetection(true);
 
+        auto highlightStyle = context->HighlightStyle(Prs3d_TypeOfHighlight_LocalSelected);
+        highlightStyle->SetFaceBoundaryDraw(true);
+        highlightStyle->SetColor(Quantity_NOC_RED1);
+        highlightStyle->SetMethod(Aspect_TOHM_COLOR);
+
         view->FitAll();
         view->ZFitAll();
         view->Redraw();
