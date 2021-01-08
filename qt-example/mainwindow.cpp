@@ -26,7 +26,13 @@ void MainWindow::addBox() {
 
     TopoDS_Shape shape = BRepPrimAPI_MakeBox(xSize, ySize, zSize).Shape();
     Handle(AIS_Shape) aisShape = new AIS_Shape(shape);
-    aisShape->SetColor(Quantity_NOC_BEET);
+
+    Graphic3d_MaterialAspect matAspect;
+    matAspect.SetDiffuseColor(Quantity_NOC_BEET);
+    matAspect.SetAmbientColor(Quantity_NOC_BEET);
+    matAspect.SetSpecularColor(Quantity_NOC_GREEN1);
+
+    aisShape->SetMaterial(matAspect);
 
     this->occView->context->Display(aisShape, Standard_True);
 
