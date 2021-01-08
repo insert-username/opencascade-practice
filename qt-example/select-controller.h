@@ -8,6 +8,7 @@
 #include "mouse-input-monitor.h"
 #include <V3d_Viewer.hxx>
 #include <TopoDS_Shape.hxx>
+#include <SelectMgr_SelectionManager.hxx>
 
 class SelectController {
 
@@ -17,14 +18,13 @@ public:
                Handle(AIS_InteractiveContext) context) {
 
         if (mouseCommand.mouseCommandType == CLICK) {
-            context->Select(
-                    mouseCommand.x,
-                    mouseCommand.y,
-                    mouseCommand.x + 1,
-                    mouseCommand.y + 1,
-                    view,
-                    true
-                    );
+            context->MoveTo(mouseCommand.x, mouseCommand.y, view, false);
+            context->MainSelector()->SortResult();
+            context->InitDetected();
+            if (context->MoreDetected()) {
+                context->AddSelect(context->DetectedInteractive());
+                view->Update();
+            }
         }
     }
 };
