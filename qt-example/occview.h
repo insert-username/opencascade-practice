@@ -57,7 +57,11 @@ public:
         viewer->SetDefaultLights();
         viewer->SetLightOn();
 
-        view->SetBackgroundColor(Quantity_NOC_BLACK);
+        view->SetBgGradientColors(
+                Quantity_NOC_BLACK,
+                Quantity_NOC_RED1,
+                Aspect_GradientFillMethod::Aspect_GFM_CORNER1,
+                false);
         view->MustBeResized();
         view->TriedronDisplay(
                 Aspect_TOTP_LEFT_LOWER,
@@ -76,6 +80,15 @@ public:
         highlightStyle->SetFaceBoundaryDraw(true);
         highlightStyle->SetColor(Quantity_NOC_RED1);
         highlightStyle->SetMethod(Aspect_TOHM_COLOR);
+
+        Graphic3d_RenderingParams& renderParams = view->ChangeRenderingParams();
+        renderParams.Method = Graphic3d_RM_RAYTRACING;
+        renderParams.RaytracingDepth = 3;
+        renderParams.IsShadowEnabled = true;
+        renderParams.IsReflectionEnabled = true;
+        renderParams.IsAntialiasingEnabled = true;
+        renderParams.IsTransparentShadowEnabled = true,
+        view->Update();
 
         viewer->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
         view->FitAll();

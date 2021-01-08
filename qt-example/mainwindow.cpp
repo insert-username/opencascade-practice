@@ -20,7 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::addBox() {
     std::cout << "Adding box" << std::endl;
-    TopoDS_Shape shape = BRepPrimAPI_MakeBox(3.0, 4.0, 5.0).Shape();
+    double xSize = 3.0 * static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    double ySize = 3.0 * static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+    double zSize = 3.0 * static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+
+    TopoDS_Shape shape = BRepPrimAPI_MakeBox(xSize, ySize, zSize).Shape();
     Handle(AIS_Shape) aisShape = new AIS_Shape(shape);
     aisShape->SetColor(Quantity_NOC_BEET);
 
