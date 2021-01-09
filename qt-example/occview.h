@@ -69,7 +69,7 @@ public:
                 0.08,
                 V3d_ZBUFFER);
         view->ZBufferTriedronSetup();
-        view->Camera()->SetProjectionType(Graphic3d_Camera::Projection_Orthographic);
+        view->Camera()->SetProjectionType(Graphic3d_Camera::Projection_Perspective);
 
         context = new AIS_InteractiveContext(viewer);
         context->SetDisplayMode(AIS_Shaded, Standard_True);

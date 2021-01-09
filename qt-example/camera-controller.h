@@ -21,7 +21,39 @@ class CameraController {
     double startR;
 public:
     void apply(MouseCommand mouseCommand, Handle(V3d_View) view) {
-        if (mouseCommand.mouseCommandType == DRAG_START) {
+        if (mouseCommand.mouseCommandType == ORBIT_START ||
+            mouseCommand.mouseCommandType == ORBIT) {
+            applyOrbit(mouseCommand, view);
+        }
+
+        switch (mouseCommand.mouseCommandType) {
+            case ORBIT_START:
+            case ORBIT:
+                applyOrbit(mouseCommand, view);
+                break;
+            case PAN_START:
+            case PAN:
+                applyPan(mouseCommand, view);
+                break;
+            case SCROLL:
+                applyScroll(mouseCommand, view);
+        }
+
+
+
+    }
+
+private:
+    void applyScroll(MouseCommand &mouseCommand, opencascade::handle<V3d_View> view) {
+        if (mouseCommand.mouseCommandType == SCROLL) {
+            auto scrollAmount = mouseCommand.dy;
+
+            view->Zoom(0, 0, scrollAmount, 0);
+        }
+    }
+
+    void applyOrbit(MouseCommand &mouseCommand, opencascade::handle<V3d_View> view) {
+        if (mouseCommand.mouseCommandType == ORBIT_START) {
             view->Eye(startX, startY, startZ);
 
             // determine angle
@@ -32,7 +64,7 @@ public:
             startHeightAngle = std::atan2(startZ, xyHypot);
 
             startR = std::hypot(startZ, xyHypot);
-        } else if (mouseCommand.mouseCommandType == DRAG) {
+        } else if (mouseCommand.mouseCommandType == ORBIT) {
             double dragHeightAngle = std::max(std::min(
                     mouseCommand.dy * MOUSE_SENSITIVITY + startHeightAngle,
                     M_PI_2), -M_PI_2);
@@ -45,13 +77,17 @@ public:
                     rxy * std::sin(dragZAxAngle),
                     rxy * std::cos(dragZAxAngle),
                     rz);
-        } else if (mouseCommand.mouseCommandType == SCROLL) {
-            auto scrollAmount = mouseCommand.dy;
-
-            view->Zoom(0, 0, scrollAmount, 0);
         }
+    }
 
+    void applyPan(MouseCommand &mouseCommand, opencascade::handle<V3d_View> view) {
+        if (mouseCommand.mouseCommandType == PAN_START) {
+            view->Pan(0, 0, 1, true);
+        } else if (mouseCommand.mouseCommandType == PAN) {
+            view->Pan(mouseCommand.dx, -mouseCommand.dy, 1, false);
+        }
     }
 };
+
 
 #endif // CAMERACONTROLLER_H

@@ -5,8 +5,10 @@
 
 enum MouseCommandType {
     NONE,
-    DRAG,
-    DRAG_START,
+    ORBIT,
+    ORBIT_START,
+    PAN,
+    PAN_START,
     SCROLL,
     CLICK
 };
@@ -27,16 +29,19 @@ struct MouseCommand {
 class MouseInputMonitor {
 private:
 
-    static bool isAnyButtonDown(QMouseEvent* mouseEvent) {
+    static bool isButtonDown(QMouseEvent* mouseEvent, u_int8_t btnMap) {
         auto buttons = mouseEvent->buttons();
 
-        return (buttons & Qt::LeftButton) ||
-               (buttons & Qt::MiddleButton) ||
-               (buttons & Qt::RightButton);
+        return buttons & btnMap;
     }
 
     // tracks a single contiguous drag operation.
     class DragStateMonitor {
+
+        uint8_t btnMap;
+        MouseCommandType dragStartCommand;
+        MouseCommandType dragCommand;
+
         int xDragStart{};
         int yDragStart{};
 
@@ -47,6 +52,15 @@ private:
         bool isDragInProgress = false;
 
     public:
+        DragStateMonitor(uint8_t btnMap,
+                         MouseCommandType dragStartCommand,
+                         MouseCommandType dragCommand) :
+                            btnMap(btnMap),
+                            dragStartCommand(dragStartCommand),
+                            dragCommand(dragCommand) {
+
+        }
+
         // need to process at least two events to
         // qualify as a drag.
         void accept(QEvent* event) {
@@ -58,7 +72,7 @@ private:
 
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
-            if (isAnyButtonDown(mouseEvent)) {
+            if (isButtonDown(mouseEvent, btnMap)) {
                 if (!isMouseDown) {
                     xDragStart = mouseEvent->x();
                     yDragStart = mouseEvent->y();
@@ -77,9 +91,9 @@ private:
         bool poll(MouseCommand &mouseCommand) const {
             // if not dragging, do nothing.
             if (isDragInProgress) {
-                mouseCommand.mouseCommandType = DRAG;
+                mouseCommand.mouseCommandType = dragCommand;
             } else if (isMouseDown) {
-                mouseCommand.mouseCommandType = DRAG_START;
+                mouseCommand.mouseCommandType = dragStartCommand;
             } else {
                 mouseCommand.mouseCommandType = NONE;
             }
@@ -96,6 +110,8 @@ private:
     //
     class ClickStateMonitor {
     private:
+        uint8_t btnMap;
+
         // indicates if the mouse was down
         // the last time the event was triggered.
         bool wasLastEventMouseDown = false;
@@ -106,6 +122,10 @@ private:
         QPoint clickPoint;
 
     public:
+        ClickStateMonitor(uint8_t btnMap) : btnMap(btnMap) {
+
+        }
+
         void accept(QEvent* event) {
 
             if (event->type() != QEvent::MouseButtonPress &&
@@ -118,7 +138,7 @@ private:
 
             auto mouseEvent = static_cast<QMouseEvent*>(event);
 
-            if (isAnyButtonDown(mouseEvent)) {
+            if (isButtonDown(mouseEvent, btnMap)) {
                 if (wasLastEventMouseDown) {
                     hasMouseDragged |= mouseEvent->pos() != initialMouseDownPoint;
                 } else {
@@ -178,24 +198,35 @@ private:
         }
     };
 
-    DragStateMonitor dragStateMonitor;
+    DragStateMonitor dragOrbitStateMonitor;
+    DragStateMonitor dragPanStateMonitor;
     ClickStateMonitor clickStateMonitor;
     ScrollStateMonitor scrollStateMonitor;
 
     MouseCommand currentMouseCommand{};
 
 public:
+    MouseInputMonitor() :
+            dragOrbitStateMonitor(Qt::LeftButton, ORBIT_START, ORBIT),
+            dragPanStateMonitor(Qt::MiddleButton, PAN_START, PAN),
+            clickStateMonitor(Qt::LeftButton),
+            scrollStateMonitor() {
+
+    }
+
     // accept the latest mouse event.
     // note that the next polled command
     // may be overwritten by this.
     bool accept(QEvent* mouseEvent) {
-        dragStateMonitor.accept(mouseEvent);
+        dragOrbitStateMonitor.accept(mouseEvent);
+        dragPanStateMonitor.accept(mouseEvent);
         clickStateMonitor.accept(mouseEvent);
         scrollStateMonitor.accept(mouseEvent);
 
         return clickStateMonitor.poll(currentMouseCommand) ||
-            dragStateMonitor.poll(currentMouseCommand) ||
-            scrollStateMonitor.poll(currentMouseCommand);
+               dragOrbitStateMonitor.poll(currentMouseCommand) ||
+               dragPanStateMonitor.poll(currentMouseCommand) ||
+               scrollStateMonitor.poll(currentMouseCommand);
     }
 
     // returns true if a mouse command is available to
