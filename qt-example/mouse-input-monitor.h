@@ -49,7 +49,15 @@ private:
     public:
         // need to process at least two events to
         // qualify as a drag.
-        void accept(QMouseEvent* mouseEvent) {
+        void accept(QEvent* event) {
+            if (event->type() != QEvent::MouseMove) {
+
+                // nothing to do.
+                return;
+            }
+
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+
             if (isAnyButtonDown(mouseEvent)) {
                 if (!isMouseDown) {
                     xDragStart = mouseEvent->x();
@@ -81,7 +89,7 @@ private:
             mouseCommand.dx = xDragCurrent - xDragStart;
             mouseCommand.dy = yDragCurrent - yDragStart;
 
-            return true;
+            return mouseCommand.mouseCommandType != NONE;
         }
     };
 
@@ -98,7 +106,18 @@ private:
         QPoint clickPoint;
 
     public:
-        void accept(QMouseEvent* mouseEvent) {
+        void accept(QEvent* event) {
+
+            if (event->type() != QEvent::MouseButtonPress &&
+                event->type() != QEvent::MouseButtonRelease &&
+                event->type() != QEvent::MouseMove) {
+
+                // nothing to do.
+                return;
+            }
+
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+
             if (isAnyButtonDown(mouseEvent)) {
                 if (wasLastEventMouseDown) {
                     hasMouseDragged |= mouseEvent->pos() != initialMouseDownPoint;
@@ -126,6 +145,8 @@ private:
                 mouseCommand.x = clickPoint.x();
                 mouseCommand.y = clickPoint.y();
                 mouseCommand.mouseCommandType = CLICK;
+                hasClicked = false;
+                wasLastEventMouseDown = false;
                 return true;
             } else {
                 return false;
@@ -133,8 +154,32 @@ private:
         }
     };
 
+    class ScrollStateMonitor {
+    private:
+        int scrollAmount = 0;
+
+    public:
+        void accept(QEvent* event) {
+            if (event->type() == QEvent::Wheel) {
+                auto wheelEvent = static_cast<QWheelEvent*>(event);
+                scrollAmount = wheelEvent->delta();
+            }
+        }
+
+        bool poll(MouseCommand &mouseCommand) {
+            if (scrollAmount != 0) {
+                mouseCommand.dy = scrollAmount;
+                scrollAmount = 0;
+                return true;
+            }
+
+            return false;
+        }
+    };
+
     DragStateMonitor dragStateMonitor;
     ClickStateMonitor clickStateMonitor;
+    ScrollStateMonitor scrollStateMonitor;
 
     MouseCommand currentMouseCommand{};
 
@@ -142,13 +187,14 @@ public:
     // accept the latest mouse event.
     // note that the next polled command
     // may be overwritten by this.
-    void accept(QMouseEvent* mouseEvent) {
+    bool accept(QEvent* mouseEvent) {
         dragStateMonitor.accept(mouseEvent);
         clickStateMonitor.accept(mouseEvent);
+        scrollStateMonitor.accept(mouseEvent);
 
-        if (!clickStateMonitor.poll(currentMouseCommand)) {
-            dragStateMonitor.poll(currentMouseCommand);
-        }
+        return clickStateMonitor.poll(currentMouseCommand) ||
+            dragStateMonitor.poll(currentMouseCommand) ||
+            scrollStateMonitor.poll(currentMouseCommand);
     }
 
     // returns true if a mouse command is available to

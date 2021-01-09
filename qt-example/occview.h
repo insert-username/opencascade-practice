@@ -114,28 +114,20 @@ protected:
     }
 
 protected:
-    void mouseMoveEvent(QMouseEvent *event) override {
-        processMouseEvent(event);
+
+    bool event(QEvent *event) override {
+        bool isEventProcessed = mouseInputMonitor.accept(event);
+
+        // fallback event handling.
+        if (isEventProcessed) {
+            cameraController.apply(mouseInputMonitor.poll(), view);
+            selectController.apply(mouseInputMonitor.poll(), view, context);
+            return true;
+        } else {
+            return QGLWidget::event(event);
+        }
     }
 
-    void mousePressEvent(QMouseEvent *event) override {
-        processMouseEvent(event);
-    }
-
-    void mouseReleaseEvent(QMouseEvent *event) override {
-        processMouseEvent(event);
-    }
-
-    void mouseDoubleClickEvent(QMouseEvent *event) override {
-        processMouseEvent(event);
-    }
-
-private:
-    void processMouseEvent(QMouseEvent* event) {
-        mouseInputMonitor.accept(event);
-        cameraController.apply(mouseInputMonitor.poll(), view);
-        selectController.apply(mouseInputMonitor.poll(), view, context);
-    }
 };
 
 #endif // OCCVIEW_H
