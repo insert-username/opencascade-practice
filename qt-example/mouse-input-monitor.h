@@ -168,6 +168,7 @@ private:
 
         bool poll(MouseCommand &mouseCommand) {
             if (scrollAmount != 0) {
+                mouseCommand.mouseCommandType = SCROLL;
                 mouseCommand.dy = scrollAmount;
                 scrollAmount = 0;
                 return true;

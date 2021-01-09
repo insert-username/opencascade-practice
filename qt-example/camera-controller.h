@@ -45,6 +45,10 @@ public:
                     rxy * std::sin(dragZAxAngle),
                     rxy * std::cos(dragZAxAngle),
                     rz);
+        } else if (mouseCommand.mouseCommandType == SCROLL) {
+            auto scrollAmount = mouseCommand.dy;
+
+            view->Zoom(0, 0, scrollAmount, 0);
         }
 
     }

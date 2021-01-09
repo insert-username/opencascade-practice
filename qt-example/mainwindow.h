@@ -62,8 +62,6 @@ protected slots:
         this->occView->context->Load(aisShape, -1);
         this->occView->context->Activate(aisShape, TopAbs_FACE);
 
-        this->occView->view->FitAll();
-        this->occView->view->ZFitAll();
         this->occView->view->Redraw();
     };
 

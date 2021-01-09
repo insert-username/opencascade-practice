@@ -88,12 +88,10 @@ public:
         renderParams.IsReflectionEnabled = true;
         renderParams.IsAntialiasingEnabled = true;
         renderParams.IsTransparentShadowEnabled = true,
-        view->Update();
 
         viewer->ActivateGrid(Aspect_GT_Rectangular, Aspect_GDM_Lines);
-        view->FitAll();
-        view->ZFitAll();
-        view->Redraw();
+        view->SetScale(10);
+        view->Update();
 
         setMouseTracking(true);
     }
