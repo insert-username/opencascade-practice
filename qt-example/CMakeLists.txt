@@ -51,45 +51,8 @@ message("Qt5Gui_INCLUDE_DIRS ${Qt5Gui_INCLUDE_DIRS}")
 message("Qt5Widgets_INCLUDE_DIRS ${Qt5Widgets_INCLUDE_DIRS}")
 message("Qt5OpenGL_INCLUDE_DIRS ${Qt5OpenGL_INCLUDE_DIRS}")
 
-file(GLOB SOURCES *.cpp *.h *.ui)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-if(ANDROID)
-  add_library(qt-example SHARED
-    main.cpp
-    ${SOURCES}
-  )
-else()
-  add_executable(qt-example
-    main.cpp
-    ${SOURCES}
-  )
-endif()
-
-set(OPENCC_LIBS
-    TKOpenGl
-    TKV3d
-    TKFillet
-    TKMesh
-    TKernel
-    TKG2d
-    TKG3d
-    TKMath
-    TKIGES
-    TKSTL
-    TKShHealing
-    TKXSBase
-    TKBool
-    TKBO
-    TKBRep
-    TKTopAlgo
-    TKGeomAlgo
-    TKGeomBase
-    TKOffset
-    TKPrim
-    TKSTEPBase
-    TKSTEPAttr
-    TKSTEP209 TKSTEP
-    TKHLR
-    TKFeat)
-
-target_link_libraries(qt-example GL OpenGL Qt5::Core Qt5::OpenGL Qt5::Gui Qt5::Widgets ${OPENCC_LIBS})
+add_subdirectory(src)
